@@ -148,8 +148,6 @@ class Application(BaseModel):
         super().clean()
         if self.job_id and self.organization_id and self.job.organization_id != self.organization_id:
             raise ValidationError({"job": "Job must belong to the same organization."})
-        if self.candidate_id and self.candidate.account_type != "candidate":
-            raise ValidationError({"candidate": "Only candidate accounts can apply to jobs."})
         if self.cv:
             max_size = 5 * 1024 * 1024
             if self.cv.size > max_size:

@@ -152,3 +152,37 @@ def test_candidate_applications_me(candidate_client, application):
     data = response.json()["data"]
     assert len(data) == 1
     assert data[0]["job_title"] == application.job.title
+
+
+@pytest.mark.django_db
+def test_employer_apply_success(auth_client, open_job, organization, owner_user):
+    cv = SimpleUploadedFile("resume.pdf", b"%PDF-1.4 resume", content_type="application/pdf")
+    response = auth_client.post(
+        "/api/v1/applications/",
+        {"job": str(open_job.id), "cover_letter": "Interested in this role", "cv": cv},
+        format="multipart",
+    )
+    assert response.status_code == 201
+    assert Application.objects.filter(job=open_job, candidate=owner_user).exists()
+
+
+@pytest.mark.django_db
+def test_employer_applications_me(auth_client, open_job, organization, owner_user):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from apps.jobs.models import Application
+
+    cv = SimpleUploadedFile("resume.pdf", b"%PDF-1.4 resume", content_type="application/pdf")
+    Application.objects.create(
+        organization=organization,
+        job=open_job,
+        candidate=owner_user,
+        stage=Application.Stage.APPLIED,
+        cv=cv,
+        created_by=owner_user,
+    )
+    response = auth_client.get("/api/v1/applications/me/")
+    assert response.status_code == 200
+    data = response.json()["data"]
+    assert len(data) == 1
+    assert data[0]["job_title"] == open_job.title

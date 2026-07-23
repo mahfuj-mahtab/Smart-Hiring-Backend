@@ -172,10 +172,9 @@ class ApplicationListSerializer(serializers.ModelSerializer):
     def get_cv_url(self, obj):
         if not obj.cv:
             return None
-        request = self.context.get("request")
-        if request:
-            return request.build_absolute_uri(obj.cv.url)
-        return obj.cv.url
+        from django.conf import settings
+
+        return f"{settings.PUBLIC_API_URL}{obj.cv.url}"
 
 
 class ApplicationDetailSerializer(ApplicationListSerializer):

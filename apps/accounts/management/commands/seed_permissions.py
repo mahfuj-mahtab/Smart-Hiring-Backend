@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from apps.accounts.models import Permission
 
-MODULES = ["job", "candidate", "employee", "role"]
+MODULES = ["job", "candidate", "employee", "role", "organization"]
 ACTIONS = [
     ("view", "Can view"),
     ("add", "Can add"),

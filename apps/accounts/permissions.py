@@ -15,6 +15,13 @@ class IsEmployerUser(BasePermission):
         )
 
 
+class CanApplyToJobs(BasePermission):
+    message = "Authentication is required to apply to jobs."
+
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+
+
 class IsCandidateUser(BasePermission):
     message = "This endpoint is only available to candidate accounts."
 

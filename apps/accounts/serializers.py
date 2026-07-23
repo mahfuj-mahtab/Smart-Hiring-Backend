@@ -86,10 +86,21 @@ class OrganizationMemberDetailSerializer(OrganizationMemberListSerializer):
         fields = OrganizationMemberListSerializer.Meta.fields
 
 
+class EmployerUserCreateSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(write_only=True, min_length=8)
+    first_name = serializers.CharField(max_length=150, required=False, default="")
+    last_name = serializers.CharField(max_length=150, required=False, default="")
+
+
 class OrganizationMemberCreateSerializer(serializers.ModelSerializer):
+    new_user = EmployerUserCreateSerializer(write_only=True, required=False)
+
     class Meta:
         model = OrganizationMember
-        fields = ["user", "role", "is_active"]
+        fields = ["user", "role", "is_active", "new_user"]
+        extra_kwargs = {"user": {"required": False}}
 
     def validate_user(self, value):
         organization = self.context["request"].organization
@@ -98,6 +109,15 @@ class OrganizationMemberCreateSerializer(serializers.ModelSerializer):
         if value.account_type != User.AccountType.EMPLOYER:
             raise serializers.ValidationError("Only employer accounts can be organization members.")
         return value
+
+    def validate(self, attrs):
+        user = attrs.get("user")
+        new_user = attrs.get("new_user")
+        if user and new_user:
+            raise serializers.ValidationError("Provide either user or new_user, not both.")
+        if not user and not new_user:
+            raise serializers.ValidationError("Either user or new_user is required.")
+        return attrs
 
 
 class OrganizationMemberUpdateSerializer(serializers.ModelSerializer):

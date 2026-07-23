@@ -65,8 +65,6 @@ class ApplicationService:
             raise ValidationError({"job": "Job does not belong to this organization."})
         if job.status != Job.Status.OPEN:
             raise ValidationError({"job": "This job is not accepting applications."})
-        if candidate.account_type != "candidate":
-            raise ValidationError({"candidate": "Only candidate accounts can apply to jobs."})
         if Application.objects.filter(job=job, candidate=candidate).exists():
             raise ValidationError({"detail": "You have already applied to this job."})
 

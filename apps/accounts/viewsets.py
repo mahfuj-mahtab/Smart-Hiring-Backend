@@ -1,8 +1,10 @@
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from apps.accounts.filters import OrganizationMemberFilter, RoleFilter
 from apps.accounts.models import OrganizationMember, Role
 from apps.accounts.permissions import HasPermission, IsEmployerUser
+from apps.accounts.selectors import lookup_employer_for_membership
 from apps.accounts.serializers import (
     OrganizationMemberCreateSerializer,
     OrganizationMemberDetailSerializer,
@@ -12,7 +14,7 @@ from apps.accounts.serializers import (
     RoleDetailSerializer,
     RoleListSerializer,
 )
-from apps.accounts.services import MemberService, RoleService
+from apps.accounts.services import MemberService, RoleService, UserService
 from apps.common.permissions import IsOrganizationMember, IsOrganizationOwner
 from apps.common.responses import api_response
 from apps.common.viewsets import BaseModelViewSet
@@ -87,7 +89,7 @@ class OrganizationMemberViewSet(BaseModelViewSet):
     }
 
     def get_permissions(self):
-        if self.action in ("create", "update", "partial_update", "destroy"):
+        if self.action in ("create", "update", "partial_update", "destroy", "lookup_user"):
             return [IsAuthenticated(), IsEmployerUser(), IsOrganizationMember(), IsOrganizationOwner()]
         return [IsAuthenticated(), IsEmployerUser(), IsOrganizationMember(), HasPermission("employee.view")()]
 
@@ -97,9 +99,16 @@ class OrganizationMemberViewSet(BaseModelViewSet):
             from apps.subscriptions.services import SubscriptionService
 
             SubscriptionService.check_limit(organization, self.limit_resource)
+
+        new_user_data = serializer.validated_data.pop("new_user", None)
+        if new_user_data:
+            user = UserService.create_employer_user(**new_user_data)
+        else:
+            user = serializer.validated_data["user"]
+
         member = MemberService.create_member(
             organization=organization,
-            user=serializer.validated_data["user"],
+            user=user,
             role=serializer.validated_data["role"],
             is_owner=False,
             created_by=self.request.user,
@@ -127,3 +136,13 @@ class OrganizationMemberViewSet(BaseModelViewSet):
 
             raise ValidationError({"detail": "Cannot remove the organization owner."})
         instance.delete()
+
+    @action(detail=False, methods=["get"], url_path="lookup-user")
+    def lookup_user(self, request):
+        email = request.query_params.get("email", "").strip()
+        if not email:
+            from rest_framework.exceptions import ValidationError
+
+            raise ValidationError({"email": "Email is required."})
+        data = lookup_employer_for_membership(organization=request.organization, email=email)
+        return api_response(True, "Success", data=data)

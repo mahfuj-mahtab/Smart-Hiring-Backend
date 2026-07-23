@@ -35,6 +35,7 @@ __pycache__/
 *.sqlite3-trace-shm
 *.sqlite3-trace-wal
 venv/
+.venv/
 media/
 static/
 node_modules/

@@ -4,7 +4,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from apps.accounts.permissions import HasPermission, IsCandidateUser, IsEmployerUser
+from apps.accounts.permissions import CanApplyToJobs, HasPermission, IsEmployerUser
 from apps.common.permissions import IsOrganizationMember
 from apps.common.responses import api_response
 from apps.common.viewsets import BaseModelViewSet
@@ -139,9 +139,9 @@ class ApplicationViewSet(BaseModelViewSet):
 
     def get_permissions(self):
         if self.action == "create":
-            return [IsAuthenticated(), IsCandidateUser()]
+            return [IsAuthenticated(), CanApplyToJobs()]
         if self.action == "me":
-            return [IsAuthenticated(), IsCandidateUser()]
+            return [IsAuthenticated(), CanApplyToJobs()]
         permission_map = {
             "list": HasPermission("candidate.view"),
             "retrieve": HasPermission("candidate.view"),

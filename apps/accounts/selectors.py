@@ -1,4 +1,4 @@
-from apps.accounts.models import OrganizationMember
+from apps.accounts.models import OrganizationMember, User
 
 
 def get_active_member(user, organization):
@@ -30,3 +30,24 @@ def get_user_permission_codenames(user, organization):
 
         return list(Permission.objects.values_list("codename", flat=True))
     return list(member.role.permissions.values_list("codename", flat=True))
+
+
+def lookup_employer_for_membership(*, organization, email):
+    user = User.objects.filter(email__iexact=email).first()
+    if user is None:
+        return {"status": "not_found"}
+    if user.account_type == User.AccountType.CANDIDATE:
+        return {"status": "invalid_account"}
+    if OrganizationMember.objects.filter(organization=organization, user=user).exists():
+        return {"status": "already_member"}
+    return {
+        "status": "found",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "full_name": user.get_full_name() or user.username,
+        },
+    }

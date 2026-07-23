@@ -70,6 +70,25 @@ class MemberService:
         return member
 
 
+class UserService:
+    @staticmethod
+    @transaction.atomic
+    def create_employer_user(*, email, username, password, first_name="", last_name=""):
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError({"email": "A user with this email already exists."})
+        if User.objects.filter(username__iexact=username).exists():
+            raise ValidationError({"username": "A user with this username already exists."})
+
+        return User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            account_type=User.AccountType.EMPLOYER,
+        )
+
+
 class CandidateService:
     @staticmethod
     @transaction.atomic

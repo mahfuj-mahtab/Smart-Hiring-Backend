@@ -94,6 +94,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+PUBLIC_API_URL = os.environ.get("PUBLIC_API_URL", "http://localhost:8000").rstrip("/")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
@@ -122,5 +123,10 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS",
     "http://localhost:3000",
 ).split(",")
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://[\w-]+\.localhost(:\d+)?$",
+    r"^https://[\w-]+\.localhost(:\d+)?$",
+]
 
 CORS_ALLOW_CREDENTIALS = True

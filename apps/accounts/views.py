@@ -9,6 +9,7 @@ from apps.accounts.selectors import get_active_member, get_user_permission_coden
 from apps.accounts.serializers import CandidateMeSerializer, MeSerializer, PermissionSerializer
 from apps.common.permissions import IsOrganizationMember
 from apps.common.responses import api_response
+from apps.organizations.serializers import OrganizationSerializer
 
 
 class PermissionListView(APIView):
@@ -38,17 +39,14 @@ class MeView(APIView):
     def get(self, request):
         member = get_active_member(request.user, request.organization)
         organization = request.organization
+        org_serializer = OrganizationSerializer(organization, context={"request": request})
         data = {
             "id": request.user.id,
             "email": request.user.email,
             "username": request.user.username,
             "first_name": request.user.first_name,
             "last_name": request.user.last_name,
-            "organization": {
-                "id": organization.id,
-                "name": organization.name,
-                "slug": organization.slug,
-            },
+            "organization": org_serializer.data,
             "role": {
                 "id": member.role.id,
                 "name": member.role.name,
