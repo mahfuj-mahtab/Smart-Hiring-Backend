@@ -1,0 +1,69 @@
+// generate gitignore
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzz
+*.pywzz
+*.pyzzz
+*.pywzzz
+
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-shm
+*.sqlite3-wal
+*.sqlite3-trace
+*.sqlite3-trace-journal
+*.sqlite3-trace-shm
+*.sqlite3-trace-wal
+*.sqlite3-trace-journal
+*.sqlite3-trace-shm
+*.sqlite3-trace-wal
+venv/
+media/
+static/
+node_modules/
+.next/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ignore all files in the media directory
+media/
+
+# ignore all files in the static directory
+static/
+
+# ignore all files in the node_modules directory
+node_modules/
+
+# ignore all files in the .next directory
+.next/
+
+# ignore all files in the .cursor directory
+.cursor/
+
+# ignore all files in the .vscode directory
+.vscode/
+
+# ignore all files in the .gitignore directory
+.gitignore/
+
+# ignore all files in the .gitignore directory
+.gitignore/
