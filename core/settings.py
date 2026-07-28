@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.organizations",
     "apps.subscriptions",
-    "apps.jobs",
+    "apps.jobs.apps.JobsConfig",
 ]
 
 MIDDLEWARE = [
@@ -130,3 +130,14 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_ALWAYS_EAGER = os.environ.get("CELERY_TASK_ALWAYS_EAGER", "False").lower() == "true"
+
+BULK_ACTION_MAX_ITEMS = int(os.environ.get("BULK_ACTION_MAX_ITEMS", "10000"))
+BULK_ACTION_BATCH_SIZE = int(os.environ.get("BULK_ACTION_BATCH_SIZE", "500"))

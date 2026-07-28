@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Django media files and local statics
+# (These should be handled by cloud storage like S3 in production)
+media/
+staticfiles/
+
+# Local databases (SQLite)
+*.sqlite3
+
+# Environment variables and secrets
+.env
+.env.*
+secrets.json
+*.pem
+*.key
+
+# IDEs and OS metadata
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.DS_Store
+Thumbs.db

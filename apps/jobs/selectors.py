@@ -1,6 +1,18 @@
 from collections import defaultdict
 
+from django.db.models import Q
+
+from apps.jobs.filters import ApplicationFilter
 from apps.jobs.models import Application, Job
+
+APPLICATION_SEARCH_FIELDS = [
+    "candidate__email",
+    "candidate__username",
+    "candidate__first_name",
+    "candidate__last_name",
+    "job__title",
+    "phone",
+]
 
 
 def get_open_jobs(organization):
@@ -29,6 +41,38 @@ def get_applications_grouped_by_stage(organization, job_id=None):
     for application in qs:
         grouped[application.stage].append(application)
     return dict(grouped)
+
+
+def get_applications_bulk_queryset(*, organization, selection):
+    qs = get_applications_for_org(organization)
+    mode = selection.get("mode")
+
+    if mode == "ids":
+        ids = selection.get("ids") or []
+        qs = qs.filter(id__in=ids)
+        return qs
+
+    if mode == "filter":
+        filters = selection.get("filters") or {}
+        filter_data = {
+            key: value
+            for key, value in filters.items()
+            if key not in ("search", "ordering")
+        }
+        filterset = ApplicationFilter(filter_data, queryset=qs)
+        qs = filterset.qs
+
+        search = filters.get("search")
+        if search:
+            search_query = Q()
+            for field in APPLICATION_SEARCH_FIELDS:
+                search_query |= Q(**{f"{field}__icontains": search})
+            qs = qs.filter(search_query)
+
+        ordering = filters.get("ordering") or "-applied_at"
+        return qs.order_by(ordering)
+
+    return qs.none()
 
 
 def get_application_neighbors(*, queryset, application_id):
